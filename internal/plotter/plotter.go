@@ -18,6 +18,14 @@ func rectRegulate(r Rectangle) Rectangle {
 	return r
 }
 
+func rectWidth(r Rectangle) int {
+	return r.Max.X - r.Min.X
+}
+
+func rectHeight(r Rectangle) int {
+	return r.Max.Y - r.Min.Y
+}
+
 func rectSize(r Rectangle) Point {
 	return Point{
 		X: r.Max.X - r.Min.X,
@@ -81,23 +89,31 @@ type Plotter struct {
 	offset Point
 }
 
-func ratio(dst PointF, src PointF) float64 {
+func ratio(dst PointF, src PointF) (float64, bool) {
 	ratioX := dst.X / src.X
 	ratioY := dst.Y / src.Y
 	if ratioY < ratioX {
-		return ratioY
+		return ratioY, false
 	}
-	return ratioX
+	return ratioX, true
 }
 
 // New creates a Ploatter with destination and source rectangles.
 func New(dst Rectangle, src RectangleF) Plotter {
 	dstF := rectRegulate(dst)
 	srcF := src.regulate()
+	ratio, vert := ratio(toPointF(rectSize(dstF)), srcF.size())
+	offset := dst.Min
+	// centering
+	if vert {
+		offset.Y += (rectHeight(dst) - int(src.height()*ratio+0.5)) / 2
+	} else {
+		offset.X += (rectWidth(dst) - int(src.width()*ratio+0.5)) / 2
+	}
 	return Plotter{
 		bbox:   srcF,
-		offset: dstF.Min,
-		ratio:  ratio(toPointF(rectSize(dstF)), srcF.size()),
+		offset: offset,
+		ratio:  ratio,
 	}
 }
 
