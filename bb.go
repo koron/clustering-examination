@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/koron/exam-clustering/internal/point"
+	"github.com/koron/clustering-examination/internal/point"
 )
 
 func main() {

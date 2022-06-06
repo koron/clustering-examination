@@ -1,4 +1,4 @@
-module github.com/koron/exam-clustering
+module github.com/koron/clustering-examination
 
 go 1.18
 

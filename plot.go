@@ -8,8 +8,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/koron/exam-clustering/internal/plotter"
-	"github.com/koron/exam-clustering/internal/point"
+	"github.com/koron/clustering-examination/internal/plotter"
+	"github.com/koron/clustering-examination/internal/point"
 )
 
 func plot(in, out string) error {
