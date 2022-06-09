@@ -1,11 +1,12 @@
 package point
 
 import (
-	"bufio"
 	"fmt"
 	"log"
 	"math"
-	"os"
+
+	"gonum.org/v1/plot"
+	"gonum.org/v1/plot/plotter"
 )
 
 type Node struct {
@@ -71,16 +72,12 @@ func Clustering(points []Point) (c *Cluster, root int) {
 		nodes = append(nodes, Node{A: -1, B: -1, P: i, Dist: 0})
 	}
 
-	log.Print("setup")
-
 	u := NewUTMatrix(len(alives))
 	for i, a := range alives {
 		for j, b := range alives[i+1:] {
 			u.set(i, i+j+1, distance(a, b, points, nodes))
 		}
 	}
-
-	log.Print("matrix")
 
 	mins := make([]float64, num)
 	maxs := make([]float64, num)
@@ -101,13 +98,12 @@ func Clustering(points []Point) (c *Cluster, root int) {
 		mins[i], maxs[i] = min, max
 	}
 
-	log.Print("minmax")
-
-	w := bufio.NewWriter(os.Stdout)
-	defer w.Flush()
-	for i := 0; i < num; i++ {
-		fmt.Fprintf(w, "%d,%e,%e\n", i, mins[i], maxs[i])
-	}
+	// dump min and max
+	//w := bufio.NewWriter(os.Stdout)
+	//defer w.Flush()
+	//for i := 0; i < num; i++ {
+	//	fmt.Fprintf(w, "%d,%e,%e\n", i, mins[i], maxs[i])
+	//}
 
 	//w := bufio.NewWriter(os.Stdout)
 	//defer w.Flush()
@@ -119,11 +115,44 @@ func Clustering(points []Point) (c *Cluster, root int) {
 	//		fmt.Fprintf(w, "%f", u.get(i, j))
 	//	}
 	//	fmt.Fprintln(w)
-	//	if i%200 == 199 {
-	//		log.Printf("col#%d", i)
-	//	}
 	//}
+
+	curr := mins
+	for i := 0; i < 5; i++ {
+		name := fmt.Sprintf("tmp/hist_min%d.png", i)
+		h, err := drawHist(name, curr, 10)
+		if err != nil {
+			log.Printf("drawHist failed: %s", err)
+			return nil, 0
+		}
+
+		b1 := h.Bins[0]
+		if b1.Weight == 0 {
+			break
+		}
+		next := make([]float64, 0, int(b1.Weight))
+		for _, v := range mins {
+			if v < b1.Max {
+				next = append(next, v)
+			}
+		}
+		curr = next
+	}
 
 	// TODO:
 	return nil, 0
+}
+
+func drawHist(name string, data []float64, n int) (*plotter.Histogram, error) {
+	h, err := plotter.NewHist(plotter.Values(data), n)
+	if err != nil {
+		return nil, err
+	}
+	p := plot.New()
+	p.Add(h)
+	err = p.Save(1024, 1024, name)
+	if err != nil {
+		return nil, err
+	}
+	return h, nil
 }
