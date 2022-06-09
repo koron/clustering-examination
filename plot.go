@@ -67,7 +67,7 @@ func main() {
 	}
 	flag.Arg(0)
 
-	err := plot(flag.Arg(0), "out.png")
+	err := plot(flag.Arg(0), "tmp/out.png")
 	if err != nil {
 		log.Fatal(err)
 	}

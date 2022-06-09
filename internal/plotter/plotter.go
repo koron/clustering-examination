@@ -121,6 +121,6 @@ func New(dst Rectangle, src RectangleF) Plotter {
 func (p Plotter) Plot(src PointF) (Point, bool) {
 	return Point{
 		X: int((src.X-p.bbox.Min.X)*p.ratio+0.5) + p.offset.X,
-		Y: int((src.Y-p.bbox.Min.Y)*p.ratio+0.5) + p.offset.Y,
+		Y: int((p.bbox.Max.Y-src.Y)*p.ratio+0.5) + p.offset.Y,
 	}, p.bbox.in(src)
 }
