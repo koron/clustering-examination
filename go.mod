@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/google/go-cmp v0.5.8
+	gonum.org/v1/gonum v0.11.0
 	gonum.org/v1/plot v0.11.0
 )
 

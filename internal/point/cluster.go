@@ -7,6 +7,8 @@ import (
 
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
+	"gonum.org/v1/plot/vg"
+	"gonum.org/v1/plot/vg/draw"
 )
 
 type Node struct {
@@ -117,10 +119,47 @@ func Clustering(points []Point) (c *Cluster, root int) {
 	//	fmt.Fprintln(w)
 	//}
 
-	drawHistograms("tmp/hist_min%d.png", mins)
+	//drawHistograms("tmp/hist_min%d.png", mins)
+
+	//drawBubbles("tmp/bubbles.svg", points, alives, mins)
 
 	// TODO:
 	return nil, 0
+}
+
+func drawBubbles(name string, points []Point, alives []int, mins []float64) {
+	data := make(plotter.XYZs, 0, len(points))
+	for _, n := range alives {
+		data = append(data, plotter.XYZ{
+			X: points[n].Lon,
+			Y: points[n].Lat,
+			Z: math.Sqrt(mins[n]),
+		})
+	}
+	sc, err := plotter.NewScatter(data)
+	if err != nil {
+		log.Printf("NewScatter failed: %s", err)
+		return
+	}
+	//c := color.RGBA{}
+	sc.GlyphStyleFunc = func(i int) draw.GlyphStyle {
+		if i%100 == 0 {
+			fmt.Printf("#%d z=%e\n", i, data[i].Z)
+		}
+		return draw.GlyphStyle{
+			Radius: vg.Length(data[i].Z),
+			//Radius: vg.Length(0.1),
+			Shape: draw.CircleGlyph{},
+		}
+	}
+
+	p := plot.New()
+	p.Add(sc)
+	err = p.Save(1000, 1000, name)
+	if err != nil {
+		log.Printf("Plot.Save failed: %s", err)
+		return
+	}
 }
 
 func drawHist(name string, data []float64, n int) (*plotter.Histogram, error) {
@@ -158,4 +197,3 @@ func drawHistograms(nameFormat string, curr []float64) {
 		curr = next
 	}
 }
-
