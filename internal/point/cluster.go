@@ -117,27 +117,7 @@ func Clustering(points []Point) (c *Cluster, root int) {
 	//	fmt.Fprintln(w)
 	//}
 
-	curr := mins
-	for i := 0; i < 5; i++ {
-		name := fmt.Sprintf("tmp/hist_min%d.png", i)
-		h, err := drawHist(name, curr, 10)
-		if err != nil {
-			log.Printf("drawHist failed: %s", err)
-			return nil, 0
-		}
-
-		b1 := h.Bins[0]
-		if b1.Weight == 0 {
-			break
-		}
-		next := make([]float64, 0, int(b1.Weight))
-		for _, v := range mins {
-			if v < b1.Max {
-				next = append(next, v)
-			}
-		}
-		curr = next
-	}
+	drawHistograms("tmp/hist_min%d.png", mins)
 
 	// TODO:
 	return nil, 0
@@ -156,3 +136,26 @@ func drawHist(name string, data []float64, n int) (*plotter.Histogram, error) {
 	}
 	return h, nil
 }
+
+func drawHistograms(nameFormat string, curr []float64) {
+	for i := 0; i < 5; i++ {
+		name := fmt.Sprintf(nameFormat, i)
+		h, err := drawHist(name, curr, 10)
+		if err != nil {
+			log.Printf("drawHist failed: %s", err)
+			return
+		}
+		b1 := h.Bins[0]
+		if b1.Weight == 0 {
+			break
+		}
+		next := make([]float64, 0, int(b1.Weight))
+		for _, v := range curr {
+			if v < b1.Max {
+				next = append(next, v)
+			}
+		}
+		curr = next
+	}
+}
+
