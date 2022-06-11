@@ -75,9 +75,9 @@ func Clustering(points []Point) (c *Cluster, root int) {
 	c = &Cluster{Points: points, Nodes: nodes}
 
 	u := NewUTMatrix(len(alives))
-	for i, a := range alives {
-		for j, b := range alives[i+1:] {
-			u.Set(i, i+j+1, c.wardDistance(a, b))
+	for i := 0; i < len(alives); i++ {
+		for j := i + 1; j < len(alives); j++ {
+			u.Set(i, j, c.wardDistance(alives[i], alives[j]))
 		}
 	}
 
@@ -119,7 +119,7 @@ func Clustering(points []Point) (c *Cluster, root int) {
 	//	fmt.Fprintln(w)
 	//}
 
-	drawHistograms("tmp/hist_min%d.png", maxs)
+	drawHistograms("tmp/hist_min%d.png", mins)
 
 	//drawBubbles("tmp/bubbles.svg", points, alives, mins)
 
