@@ -17,14 +17,18 @@ func (m UTMatrix) index(a, b int) int {
 	if a > b {
 		a, b = b, a
 	}
-	n := m.n - a
-	return len(m.d) - (n * (n + 1) / 2) + (b - a)
+	// The formula before transform:
+	//		x := m.n - a
+	//		len(m.d) - (x * (x + 1) / 2) + (b - a)
+	// This is same with:
+	//		m.n*a - a*(a+1)/2 + b
+	return ((2*m.n-a-1)*a)/2 + b
 }
 
-func (m UTMatrix) get(a, b int) float64 {
+func (m UTMatrix) Get(a, b int) float64 {
 	return m.d[m.index(a, b)]
 }
 
-func (m UTMatrix) set(a, b int, v float64) {
+func (m UTMatrix) Set(a, b int, v float64) {
 	m.d[m.index(a, b)] = v
 }
