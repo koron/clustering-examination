@@ -31,33 +31,44 @@ func (c *Cluster) forPoints(start int, fn func(Point)) {
 	}
 }
 
-func (c *Cluster) wardDistance(a, b int) float64 {
+func (c *Cluster) center(nodeNums ...int) Point {
 	var center Point
-
-	// calculate the center of gravity
-	var weight float64 = 0
+	var weight float64
 	add := func(p Point) {
 		weight++
 		center.Lat += p.Lat
 		center.Lon += p.Lon
 	}
-	c.forPoints(a, add)
-	c.forPoints(b, add)
+	for _, n := range nodeNums {
+		c.forPoints(n, add)
+	}
 	if weight == 0 {
-		return 0
+		return Point{}
 	}
 	center.Lat /= weight
 	center.Lon /= weight
+	return center
+}
 
-	// calculate sum of distribution
+func (c *Cluster) sumOfSquaresOfDistances(center Point, nodeNums ...int) float64 {
 	var sum float64
 	sumDist := func(p Point) {
 		lat := p.Lat - center.Lat
 		lon := p.Lon - center.Lon
 		sum += lat*lat + lon*lon
 	}
-	c.forPoints(a, sumDist)
-	c.forPoints(b, sumDist)
+	for _, n := range nodeNums {
+		c.forPoints(n, sumDist)
+	}
+	return sum
+}
+
+func (c *Cluster) wardDistance(a, b int) float64 {
+	// calculate the center of gravity
+	center := c.center(a, b)
+
+	// calculate sum of squares of distances
+	sum := c.sumOfSquaresOfDistances(center, a, b)
 
 	return sum - c.Nodes[a].Dist - c.Nodes[b].Dist
 }
@@ -118,7 +129,7 @@ func Clustering(points []Point) (c *Cluster, root int) {
 	//	fmt.Fprintln(w)
 	//}
 
-	//smallOrBig(2e-6, mins)
+	smallOrBig(2e-6, mins)
 
 	drawHistograms("tmp/hist_min%d.png", mins)
 
