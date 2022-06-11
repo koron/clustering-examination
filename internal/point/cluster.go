@@ -1,6 +1,7 @@
 package point
 
 import (
+	"fmt"
 	"math"
 )
 
@@ -117,10 +118,24 @@ func Clustering(points []Point) (c *Cluster, root int) {
 	//	fmt.Fprintln(w)
 	//}
 
+	//smallOrBig(2e-6, mins)
+
 	drawHistograms("tmp/hist_min%d.png", mins)
 
 	//drawBubbles("tmp/bubbles.svg", points, alives, mins)
 
 	// TODO:
 	return nil, 0
+}
+
+func smallOrBig(threshold float64, data []float64) {
+	smaller, bigger := 0, 0
+	for _, v := range data {
+		if v < threshold {
+			smaller++
+		} else {
+			bigger++
+		}
+	}
+	fmt.Printf("threshold=%e smaller=%d bigger=%d smaller/total=%f\n", threshold, smaller, bigger, float64(smaller)/float64(smaller+bigger))
 }
