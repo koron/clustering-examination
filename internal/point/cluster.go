@@ -31,35 +31,33 @@ func (c *Cluster) forPoints(start int, fn func(Point)) {
 }
 
 func (c *Cluster) wardDistance(a, b int) float64 {
-	n := 0
 	var center Point
-	c.forPoints(a, func(p Point) {
-		n++
+
+	// calculate the center of gravity
+	var weight float64 = 0
+	add := func(p Point) {
+		weight++
 		center.Lat += p.Lat
 		center.Lon += p.Lon
-	})
-	c.forPoints(b, func(p Point) {
-		n++
-		center.Lat += p.Lat
-		center.Lon += p.Lon
-	})
-	if n == 0 {
+	}
+	c.forPoints(a, add)
+	c.forPoints(b, add)
+	if weight == 0 {
 		return 0
 	}
-	center.Lat /= float64(n)
-	center.Lon /= float64(n)
+	center.Lat /= weight
+	center.Lon /= weight
 
+	// calculate sum of distribution
 	var sum float64
-	c.forPoints(a, func(p Point) {
+	sumDist := func(p Point) {
 		lat := p.Lat - center.Lat
 		lon := p.Lon - center.Lon
 		sum += lat*lat + lon*lon
-	})
-	c.forPoints(b, func(p Point) {
-		lat := p.Lat - center.Lat
-		lon := p.Lon - center.Lon
-		sum += lat*lat + lon*lon
-	})
+	}
+	c.forPoints(a, sumDist)
+	c.forPoints(b, sumDist)
+
 	return sum - c.Nodes[a].Dist - c.Nodes[b].Dist
 }
 
