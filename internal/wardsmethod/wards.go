@@ -1,8 +1,10 @@
 package wardsmethod
 
 import (
+	"fmt"
 	"log"
 	"math"
+	"os"
 	"time"
 
 	"gonum.org/v1/gonum/spatial/r2"
@@ -34,57 +36,12 @@ func prepare(vecs []r2.Vec) ([]Node, []int) {
 	return nodes, alives
 }
 
-func cleanup(alives []int) []int {
-	w := 0
-	for _, v := range alives {
-		if v != -1 {
-			alives[w] = v
-			w++
-		}
-	}
-	return alives[:w]
-}
-
 func centerOfGravity(a, b Node) r2.Vec {
 	w := a.Weight + b.Weight
 	return r2.Vec{
 		X: (a.Center.X*a.Weight + b.Center.X*b.Weight) / w,
 		Y: (a.Center.Y*a.Weight + b.Center.Y*b.Weight) / w,
 	}
-}
-
-func enumVec(x int, nodes []Node, fn func(r2.Vec)) {
-	n := nodes[x]
-	if n.Left < 0 || n.Right < 0 {
-		fn(n.Center)
-		return
-	}
-	enumVec(n.Left, nodes, fn)
-	enumVec(n.Right, nodes, fn)
-}
-
-func summaryStatistic1(a, b int, nodes []Node) (r2.Vec, float64) {
-	center := centerOfGravity(nodes[a], nodes[b])
-	var sum float64
-	fn := func(v r2.Vec) {
-		x := v.X - center.X
-		y := v.Y - center.Y
-		sum += x*x + y*y
-	}
-	enumVec(a, nodes, fn)
-	enumVec(b, nodes, fn)
-
-	//na, nb := nodes[a], nodes[b]
-	//x := na.Center.X - nb.Center.X
-	//y := na.Center.Y - nb.Center.Y
-	//tmp := na.Weight*nb.Weight/(na.Weight+nb.Weight)*(x*x+y*y) + na.Delta + nb.Delta
-
-	//if math.Abs(tmp-sum) > 1e-6 {
-	//	log.Printf("summaryStatistic: tmp=%e sum=%e na(%d)=%+v nb(%d)=%+v", tmp, sum, a, na, b, nb)
-	//	panic("end")
-	//}
-
-	return center, sum
 }
 
 func delta(a, b Node) float64 {
@@ -137,7 +94,16 @@ func Clustering(vecs []r2.Vec) Tree {
 	nodes, alives := prepare(vecs)
 	for len(alives) > 1 {
 		nodes, alives = link(nodes, alives)
+		if len(alives) == 45 {
+			dump(os.Stdout, nodes, alives)
+		}
 	}
+
 	log.Printf("Clustering elapsed %s, len(nodes)=%d", time.Since(start), len(nodes))
+
+	fmt.Println()
+	tops := Top2(nodes, 45)
+	dump(os.Stdout, nodes, tops)
+
 	return Tree(nodes)
 }
