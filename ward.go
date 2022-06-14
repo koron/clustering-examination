@@ -42,7 +42,7 @@ func statistics(label string, nodes []wardsmethod.Node, alives []int) {
 	}
 	varW /= num
 	varD /= num
-	fmt.Printf("%6s: weight=%f±%f delta=%f±%f sumW=%f\n", label, meanW, varW, meanD, varD, sumW)
+	fmt.Printf("%6s: weight=%e±%e delta=%e±%e sumW=%e\n", label, meanW, varW, meanD, varD, sumW)
 }
 
 func wards(name string) error {
@@ -65,10 +65,11 @@ func wards(name string) error {
 	log.Printf("Clustering elapsed %s, len(nodes)=%d", time.Since(start), len(tree))
 
 	statistics("mid", midNodes, midAlives)
-	tops := wardsmethod.Top2(tree, 45)
-	fmt.Printf("len(tops)=%d\n", len(tops))
+	tops := wardsmethod.Top(tree, 45)
 	statistics("last", tree, tops)
 
+	//fmt.Println()
+	//wardsmethod.Dump(os.Stdout, midNodes, midAlives)
 	//fmt.Println()
 	//wardsmethod.Dump(os.Stdout, tree, tops)
 
@@ -76,6 +77,7 @@ func wards(name string) error {
 	//if err != nil {
 	//	return err
 	//}
+
 	return nil
 }
 
