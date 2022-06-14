@@ -86,17 +86,23 @@ func wards(name string) error {
 	statistics("mid", midTree, midAlives)
 	tops := wardsmethod.Top(tree, 45)
 	statistics("last", tree, tops)
+	means := wardsmethod.Mean(tree, 45)
+	statistics("mean", tree, means)
 
 	// draw histograms of weight, delta of nodes
-	drawHist("tmp/ward-mid-weigts.png", "Middle Weight", midTree.Weights(midAlives), 10)
-	drawHist("tmp/ward-mid-deltas.png", "Middle Delta", midTree.Deltas(midAlives), 10)
-	drawHist("tmp/ward-last-weigts.png", "Last Weigt", tree.Weights(tops), 10)
-	drawHist("tmp/ward-last-deltas.png", "Last Delta", tree.Deltas(tops), 10)
+	//drawHist("tmp/ward-mid-weigts.png", "Middle Weight", midTree.Weights(midAlives), 10)
+	//drawHist("tmp/ward-mid-deltas.png", "Middle Delta", midTree.Deltas(midAlives), 10)
+	//drawHist("tmp/ward-last-weigts.png", "Last Weigt", tree.Weights(tops), 10)
+	//drawHist("tmp/ward-last-deltas.png", "Last Delta", tree.Deltas(tops), 10)
+	//drawHist("tmp/ward-mean-weigts.png", "Mean Weigt", tree.Weights(means), 10)
+	//drawHist("tmp/ward-mean-deltas.png", "Mean Delta", tree.Deltas(means), 10)
 
 	//fmt.Println()
 	//wardsmethod.Dump(os.Stdout, midTree, midAlives)
 	//fmt.Println()
 	//wardsmethod.Dump(os.Stdout, tree, tops)
+	//fmt.Println()
+	//wardsmethod.Dump(os.Stdout, tree, means)
 
 	//err = writeTree("tmp/tree.txt", tree)
 	//if err != nil {
