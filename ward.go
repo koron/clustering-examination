@@ -11,6 +11,8 @@ import (
 
 	"github.com/koron/clustering-examination/internal/loader"
 	"github.com/koron/clustering-examination/internal/wardsmethod"
+	"gonum.org/v1/plot"
+	"gonum.org/v1/plot/plotter"
 )
 
 func writeTree(name string, tree wardsmethod.Tree) error {
@@ -45,31 +47,54 @@ func statistics(label string, nodes []wardsmethod.Node, alives []int) {
 	fmt.Printf("%6s: weight=%e±%e delta=%e±%e sumW=%e\n", label, meanW, varW, meanD, varD, sumW)
 }
 
+func drawHist(name, title string, data []float64, n int) (*plotter.Histogram, error) {
+	h, err := plotter.NewHist(plotter.Values(data), n)
+	if err != nil {
+		return nil, err
+	}
+	p := plot.New()
+	p.Title.Text = title
+	p.Add(h)
+	err = p.Save(1024, 1024, name)
+	if err != nil {
+		return nil, err
+	}
+	return h, nil
+}
+
 func wards(name string) error {
 	pp, err := loader.LoadTSVFile(name)
 	if err != nil {
 		return err
 	}
 
-	var midNodes []wardsmethod.Node
-	var midAlives []int
+	var (
+		midTree   wardsmethod.Tree
+		midAlives []int
+	)
 
 	start := time.Now()
 	tree := wardsmethod.Clustering(pp, wardsmethod.MonitorFunc(func(nodes []wardsmethod.Node, alives []int) {
 		if len(alives) == 45 {
-			midNodes = nodes
+			midTree = wardsmethod.Tree(nodes)
 			midAlives = make([]int, len(alives))
 			copy(midAlives, alives)
 		}
 	}))
 	log.Printf("Clustering elapsed %s, len(nodes)=%d", time.Since(start), len(tree))
 
-	statistics("mid", midNodes, midAlives)
+	statistics("mid", midTree, midAlives)
 	tops := wardsmethod.Top(tree, 45)
 	statistics("last", tree, tops)
 
+	// draw histograms of weight, delta of nodes
+	drawHist("tmp/ward-mid-weigts.png", "Middle Weight", midTree.Weights(midAlives), 10)
+	drawHist("tmp/ward-mid-deltas.png", "Middle Delta", midTree.Deltas(midAlives), 10)
+	drawHist("tmp/ward-last-weigts.png", "Last Weigt", tree.Weights(tops), 10)
+	drawHist("tmp/ward-last-deltas.png", "Last Delta", tree.Deltas(tops), 10)
+
 	//fmt.Println()
-	//wardsmethod.Dump(os.Stdout, midNodes, midAlives)
+	//wardsmethod.Dump(os.Stdout, midTree, midAlives)
 	//fmt.Println()
 	//wardsmethod.Dump(os.Stdout, tree, tops)
 

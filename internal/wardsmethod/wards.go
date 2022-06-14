@@ -20,6 +20,22 @@ func (tr Tree) Root() int {
 	return len(tr) - 1
 }
 
+func (tr Tree) Weights(indexes []int) []float64 {
+	weights := make([]float64, len(indexes))
+	for i, x := range indexes {
+		weights[i] = tr[x].Weight
+	}
+	return weights
+}
+
+func (tr Tree) Deltas(indexes []int) []float64 {
+	deltas := make([]float64, len(indexes))
+	for i, x := range indexes {
+		deltas[i] = tr[x].Delta
+	}
+	return deltas
+}
+
 func prepare(vecs []r2.Vec) ([]Node, []int) {
 	nodes := make([]Node, 0, len(vecs)*2-1)
 	alives := make([]int, len(vecs))
