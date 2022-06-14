@@ -101,8 +101,8 @@ func wards(name string) error {
 	//wardsmethod.Dump(os.Stdout, midTree, midAlives)
 	//fmt.Println()
 	//wardsmethod.Dump(os.Stdout, tree, tops)
-	//fmt.Println()
-	//wardsmethod.Dump(os.Stdout, tree, means)
+	fmt.Println()
+	wardsmethod.Dump(os.Stdout, tree, means)
 
 	//err = writeTree("tmp/tree.txt", tree)
 	//if err != nil {

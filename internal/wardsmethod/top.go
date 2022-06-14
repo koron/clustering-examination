@@ -1,6 +1,7 @@
 package wardsmethod
 
 import (
+	"fmt"
 	"sort"
 )
 
@@ -47,6 +48,7 @@ func Mean(tree Tree, n int) []int {
 			continue
 		}
 		curr = append(curr, n.Left, n.Right)
+		fmt.Printf("#%d w:%d -> %d,%d\n", v, int(n.Weight), int(tree[n.Left].Weight), int(tree[n.Right].Weight))
 		sort.SliceStable(curr, func(i, j int) bool {
 			return tree[curr[i]].Weight > tree[curr[j]].Weight
 		})
