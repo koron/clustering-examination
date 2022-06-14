@@ -1,11 +1,7 @@
 package wardsmethod
 
 import (
-	"fmt"
-	"log"
 	"math"
-	"os"
-	"time"
 
 	"gonum.org/v1/gonum/spatial/r2"
 )
@@ -19,6 +15,10 @@ type Node struct {
 }
 
 type Tree []Node
+
+func (tr Tree) Root() int {
+	return len(tr) - 1
+}
 
 func prepare(vecs []r2.Vec) ([]Node, []int) {
 	nodes := make([]Node, 0, len(vecs)*2-1)
@@ -89,21 +89,13 @@ func link(nodes []Node, alives []int) ([]Node, []int) {
 	return nodes, alives[:num-1]
 }
 
-func Clustering(vecs []r2.Vec) Tree {
-	start := time.Now()
+func Clustering(vecs []r2.Vec, m Monitor) Tree {
 	nodes, alives := prepare(vecs)
 	for len(alives) > 1 {
-		nodes, alives = link(nodes, alives)
-		if len(alives) == 45 {
-			dump(os.Stdout, nodes, alives)
+		if m != nil {
+			m.Monitor(nodes, alives)
 		}
+		nodes, alives = link(nodes, alives)
 	}
-
-	log.Printf("Clustering elapsed %s, len(nodes)=%d", time.Since(start), len(nodes))
-
-	fmt.Println()
-	tops := Top2(nodes, 45)
-	dump(os.Stdout, nodes, tops)
-
 	return Tree(nodes)
 }

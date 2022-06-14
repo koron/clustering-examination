@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func dump(w io.Writer, nodes []Node, alives []int) {
+func Dump(w io.Writer, nodes []Node, alives []int) {
 	x := make([]int, len(alives))
 	copy(x, alives)
 	sort.Ints(x)
