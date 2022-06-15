@@ -31,3 +31,14 @@ func (tr Tree) Deltas(indexes []int) []float64 {
 	}
 	return deltas
 }
+
+func (tr Tree) ForEach(start int, fn func(Node)) {
+	n := tr[start]
+	fn(n)
+	if n.Left >= 0 {
+		tr.ForEach(n.Left, fn)
+	}
+	if n.Right >= 0 {
+		tr.ForEach(n.Right, fn)
+	}
+}

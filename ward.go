@@ -4,15 +4,18 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"image/color"
 	"log"
 	"math"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/koron/clustering-examination/internal/loader"
 	"github.com/koron/clustering-examination/internal/wardsmethod"
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
+	"gonum.org/v1/plot/plotutil"
 )
 
 func writeTree(name string, tree wardsmethod.Tree) error {
@@ -101,8 +104,22 @@ func wards(name string) error {
 	//wardsmethod.Dump(os.Stdout, midTree, midAlives)
 	//fmt.Println()
 	//wardsmethod.Dump(os.Stdout, tree, tops)
-	fmt.Println()
-	wardsmethod.Dump(os.Stdout, tree, means)
+	//fmt.Println()
+	//wardsmethod.Dump(os.Stdout, tree, means)
+
+	// enumerate points of clusters
+	clustersPoints := make([]plotter.XYs, len(means))
+	points := make(plotter.XYs, len(pp))
+	for i, nn := range means {
+		clustersPoints[i] = vectors(points[:0], tree, nn)
+		points = points[len(clustersPoints[i]):]
+		//fmt.Printf("#%d w=%d/%d %+v\n", nn, int(tree[nn].Weight), len(clustersPoints[i]), clustersPoints[i])
+	}
+
+	err = drawClusters("tmp/means", clustersPoints, tree, means)
+	if err != nil {
+		return err
+	}
 
 	//err = writeTree("tmp/tree.txt", tree)
 	//if err != nil {
@@ -110,6 +127,60 @@ func wards(name string) error {
 	//}
 
 	return nil
+}
+
+func drawClusters(dirname string, clustersPoints []plotter.XYs, tree wardsmethod.Tree, indexes []int) error {
+	err := os.MkdirAll(dirname, 0777)
+	if err != nil {
+		return err
+	}
+	for i, idx := range indexes {
+		n := tree[idx]
+		name := filepath.Join(dirname, fmt.Sprintf("N%05d-W%d-D%f.png", idx, int(n.Weight), n.Delta))
+		title := fmt.Sprintf("#%d/%d node#%05d weight=%d delta=%f", i+1, len(indexes), idx, int(n.Weight), n.Delta)
+		err := drawCluster(name, title, clustersPoints, i)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func drawCluster(name, title string, clustersPoints []plotter.XYs, target int) error {
+	p := plot.New()
+	p.Title.Text = title
+	// add other scatters.
+	for i, points := range clustersPoints {
+		if i == target {
+			continue
+		}
+		sc, err := plotter.NewScatter(points)
+		sc.Color = color.Gray16{0x9999}
+		sc.Radius = 1.5
+		if err != nil {
+			return err
+		}
+		p.Add(sc)
+	}
+	// add a target scatter.
+	sc, err := plotter.NewScatter(clustersPoints[target])
+	if err != nil {
+		return err
+	}
+	sc.Color = plotutil.Color(0)
+	p.Add(sc)
+	// plot
+	return p.Save(1000, 1000, name)
+	return nil
+}
+
+func vectors(vecs plotter.XYs, tr wardsmethod.Tree, nodeNum int) plotter.XYs {
+	tr.ForEach(nodeNum, func(node wardsmethod.Node) {
+		if node.Left < 0 && node.Right < 0 {
+			vecs = append(vecs, plotter.XY(node.Center))
+		}
+	})
+	return vecs
 }
 
 func main() {
