@@ -11,8 +11,11 @@ func Dump(w io.Writer, nodes []Node, alives []int) {
 	x := make([]int, len(alives))
 	copy(x, alives)
 	sort.Ints(x)
-	for _, n := range x {
-		fmt.Fprintf(w, "node#%d: w=%-4d d=%f\n", n, int(nodes[n].Weight), nodes[n].Delta)
+	for _, i := range x {
+		n := nodes[i]
+		l := nodes[n.Left]
+		r := nodes[n.Right]
+		fmt.Fprintf(w, "node#%d: w=%-4d d=%f  - L(w=%-4d d=%f) - R(w=%-4d d=%f)\n", i, int(n.Weight), n.Delta, int(l.Weight), l.Delta, int(r.Weight), r.Delta)
 	}
 }
 
