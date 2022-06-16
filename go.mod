@@ -3,6 +3,7 @@ module github.com/koron/clustering-examination
 go 1.18
 
 require (
+	github.com/fogleman/delaunay v0.0.0-20180910191513-63f09b4c883d
 	github.com/google/go-cmp v0.5.8
 	gonum.org/v1/gonum v0.11.0
 	gonum.org/v1/plot v0.11.0
